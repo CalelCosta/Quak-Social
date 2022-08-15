@@ -1,4 +1,6 @@
-# code-with-quarkus Project
+# Quack-Social
+
+A small social media to interact with posts and publications. 
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
