@@ -1,4 +1,4 @@
-# Quack-Social
+# Quak-Social
 
 A small social media to interact with posts and publications. 
 
