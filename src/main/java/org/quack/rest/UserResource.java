@@ -8,9 +8,12 @@ import org.quack.rest.dto.UserRequest;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.Set;
 
 @Path("/users")
 @Consumes(MediaType.APPLICATION_JSON)
@@ -18,16 +21,27 @@ import javax.ws.rs.core.Response;
 public class UserResource {
 
     private static final Logger LOGGER = Logger.getLogger(String.valueOf(UserResource.class));
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final Validator validator;
 
     @Inject
-    public UserResource(UserRepository userRepository) {
+    public UserResource(UserRepository userRepository, Validator validator) {
         this.userRepository = userRepository;
+        this.validator = validator;
     }
 
     @POST
     @Transactional
     public Response createUser( UserRequest userRequest ){
+
+        Set<ConstraintViolation<UserRequest>> validate = validator.validate(userRequest);
+
+        if (!validate.isEmpty()) {
+            ConstraintViolation<UserRequest> userRequestConstraintViolation = validate.stream().findAny().get();
+            String message = userRequestConstraintViolation.getMessage();
+            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+        }
+
         User user = new User();
         user.setName(userRequest.getName());
         user.setAge(userRequest.getAge());
