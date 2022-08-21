@@ -1,11 +1,12 @@
 package org.quack.rest;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import org.jboss.logmanager.Logger;
 import org.quack.domain.model.User;
+import org.quack.domain.repository.UserRepository;
 import org.quack.rest.dto.UserRequest;
 
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -17,6 +18,12 @@ import javax.ws.rs.core.Response;
 public class UserResource {
 
     private static final Logger LOGGER = Logger.getLogger(String.valueOf(UserResource.class));
+    private UserRepository userRepository;
+
+    @Inject
+    public UserResource(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @POST
     @Transactional
@@ -24,16 +31,43 @@ public class UserResource {
         User user = new User();
         user.setName(userRequest.getName());
         user.setAge(userRequest.getAge());
-        user.persist();
+        userRepository.persist(user);
         LOGGER.info("User created");
         return Response.ok(user).build();
     }
 
     @GET
     public Response listAllUsers(){
-        PanacheQuery<User> query = User.findAll();
+        PanacheQuery<User> query = userRepository.findAll();
         LOGGER.info("Request successfully");
         return Response.ok(query.list()).build();
+    }
+
+    @DELETE
+    @Path("{id}")
+    @Transactional
+    public Response deleteUser(@PathParam("id") Long id) {
+        User user = userRepository.findById(id);
+        if (user != null) {
+            userRepository.delete(user);
+            LOGGER.info("User with id n:" + id + " deleted successfully");
+            return Response.ok().build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
+    }
+
+    @PUT
+    @Path("{id}")
+    @Transactional
+    public Response updateUser(@PathParam("id") Long id, UserRequest userRequest) {
+        User user = userRepository.findById(id);
+        if (user != null) {
+            user.setName(userRequest.getName());
+            user.setAge(userRequest.getAge());
+            LOGGER.info("User with id n:" + id + " updated successfully");
+            return Response.ok().build();
+        }
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
 }
