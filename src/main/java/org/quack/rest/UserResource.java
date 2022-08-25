@@ -4,6 +4,7 @@ import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import org.jboss.logmanager.Logger;
 import org.quack.domain.model.User;
 import org.quack.domain.repository.UserRepository;
+import org.quack.rest.dto.ResponseError;
 import org.quack.rest.dto.UserRequest;
 
 import javax.inject.Inject;
@@ -37,9 +38,8 @@ public class UserResource {
         Set<ConstraintViolation<UserRequest>> validate = validator.validate(userRequest);
 
         if (!validate.isEmpty()) {
-            ConstraintViolation<UserRequest> userRequestConstraintViolation = validate.stream().findAny().get();
-            String message = userRequestConstraintViolation.getMessage();
-            return Response.status(Response.Status.BAD_REQUEST).entity(message).build();
+            ResponseError fromValidate = ResponseError.createFromValidate(validate);
+            return Response.status(Response.Status.BAD_REQUEST).entity(fromValidate).build();
         }
 
         User user = new User();
