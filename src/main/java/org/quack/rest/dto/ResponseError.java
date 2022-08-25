@@ -1,12 +1,19 @@
 package org.quack.rest.dto;
 
+import lombok.Data;
+
 import javax.validation.ConstraintViolation;
+import javax.ws.rs.core.Response;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Data
 public class ResponseError {
+
+    public static final int UNPROCESSABLE_ENTITY_STATUS = 422;
+
     private Collection<ErrorResorce> errors;
     private String message;
 
@@ -26,19 +33,7 @@ public class ResponseError {
         return new ResponseError(errors, message);
     }
 
-    public Collection<ErrorResorce> getErrors() {
-        return errors;
-    }
-
-    public void setErrors(Collection<ErrorResorce> errors) {
-        this.errors = errors;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+    public Response withStatusCode(int code) {
+        return Response.status(code).entity(this).build();
     }
 }
