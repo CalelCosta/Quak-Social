@@ -79,8 +79,24 @@ public class FollowerResource {
         List<FollowerResponse> followerList = list.stream().map(FollowerResponse::new).collect(Collectors.toList());
 
         responseObject.setContent(followerList);
-        LOGGER.info("List of Followers returned");
 
+        LOGGER.info("List of Followers returned");
         return Response.ok(responseObject).build();
+    }
+
+    @DELETE
+    @Transactional
+    public Response unfollowUser(@PathParam("userId") Long userId, @QueryParam("followerId") Long followerId) {
+        var user = userRepository.findById(userId);
+
+        if (user == null) {
+            LOGGER.info("User not found");
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        followerRepository.deleteByFollowerAndUser(followerId, userId);
+
+        LOGGER.info("Unfollow Success");
+        return Response.status(Response.Status.NO_CONTENT).build();
     }
 }
