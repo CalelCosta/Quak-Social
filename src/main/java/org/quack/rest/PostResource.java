@@ -46,7 +46,7 @@ public class PostResource {
         post.setUser(user);
 
         postRepository.persist(post);
-
+        LOGGER.info("Post Created");
         return Response.status(Response.Status.CREATED).build();
     }
 
@@ -65,6 +65,7 @@ public class PostResource {
                 .map(PostResponse::fromEntity)
                 .collect(Collectors.toList());
 
+        LOGGER.info("List of posts returned successfully");
         return Response.ok(postResponses).build();
     }
 }
